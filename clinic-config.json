@@ -1,0 +1,48 @@
+{
+  "_HOW_TO_EDIT": "Everything the chatbot tells patients about the clinic comes from this file. Change the text between the quote marks, keep the quote marks and commas, save, then click Redeploy in Coolify. Keep these values the same as site-config.json on the website.",
+  "_ESTIMATES_TO_CONFIRM": "Phone, address and hours are the clinic's confirmed details (Nov 2026). Prices are the same estimated ranges used on the website.",
+
+  "assistant_name": "Asha",
+  "clinic_name": "Dr Shilpa Fertility",
+  "doctor_name": "Dr Shilpa Agrawal",
+  "website": "https://www.drshilpafertility.com",
+  "booking_page": "https://www.drshilpafertility.com/book-appointment/",
+  "privacy_page": "https://www.drshilpafertility.com/privacy-policy/",
+  "cost_page": "https://www.drshilpafertility.com/cost/",
+  "online_consultation_page": "https://www.drshilpafertility.com/online-consultation/",
+
+  "phone_display": "+91 98775 14819",
+  "phone_link": "+919877514819",
+  "whatsapp_number": "919877514819",
+  "email": "care@drshilpafertility.com",
+
+  "address": "Nursing Home 2, opposite SBI Training Center, Sector 14, Panchkula, Haryana 134113",
+  "address_note": "In Sector 14, Panchkula — about 20–25 minutes from Chandigarh, 25 minutes from Zirakpur and 30–35 minutes from Mohali",
+  "hours": "Mon–Sun, 9:30 am – 8:30 pm",
+  "hours_sunday": "Open 7 days a week",
+
+  "prices": {
+    "Consultation": "₹1,000",
+    "Online video consultation": "₹1,000",
+    "Follow-up visit (within 15 days)": "₹500",
+    "Fertility work-up panel": "₹5,000 – ₹10,000",
+    "Semen analysis": "₹600 – ₹1,200",
+    "AMH test": "₹1,200 – ₹2,200",
+    "HSG tubal test": "₹2,500 – ₹5,000",
+    "Ovulation induction (per cycle)": "₹3,000 – ₹8,000",
+    "IUI (per cycle)": "₹12,000 – ₹25,000",
+    "Donor sperm IUI (per cycle)": "₹18,000 – ₹32,000",
+    "IVF (per cycle, standard medicines included)": "₹1,45,000 – ₹2,25,000",
+    "IVF + ICSI (per cycle)": "₹1,60,000 – ₹2,50,000",
+    "Frozen embryo transfer (per transfer)": "₹40,000 – ₹75,000",
+    "Egg freezing (per cycle, first year storage included)": "₹1,20,000 – ₹1,80,000",
+    "Embryo freezing": "₹25,000 – ₹40,000",
+    "Sperm freezing (first year)": "₹6,000 – ₹15,000",
+    "Yearly storage of eggs, sperm or embryos": "₹15,000 – ₹25,000",
+    "Donor egg IVF (per cycle)": "₹2,50,000 – ₹3,75,000",
+    "Genetic testing of embryos, PGT (per embryo)": "₹22,000 – ₹35,000",
+    "Hysteroscopy": "₹18,000 – ₹55,000",
+    "Laparoscopy": "₹45,000 – ₹1,10,000",
+    "Antenatal (pregnancy) visit": "₹800 – ₹1,000"
+  }
+}
