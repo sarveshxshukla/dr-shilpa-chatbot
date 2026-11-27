@@ -15,7 +15,7 @@ if (process.env.CLINIC_WHATSAPP) CLINIC.whatsapp_number = process.env.CLINIC_WHA
 const PORT = process.env.PORT || 3000;
 const GEMINI_KEYS = (process.env.GEMINI_API_KEY || "").split(",").map(k => k.trim()).filter(Boolean); // one or more keys (comma-separated) — each Google project has its own quota
 const GEMINI_KEY = GEMINI_KEYS[0] || "";
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 const GEMINI_BASE = (process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com").replace(/\/$/, "");
 const GROQ_KEY = process.env.GROQ_API_KEY || "";                          // optional free fallback when Gemini is busy — get one at console.groq.com
 const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
@@ -168,7 +168,14 @@ You: {"reply":"We're at ${CLINIC.address} — about 20–25 minutes from Chandig
 
 
 /* -------------------- Gemini call -------------------- */
-const FALLBACK_MODEL = "gemini-2.5-flash-lite";
+const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || "gemini-3.1-flash-lite";
+// Gemini 3.x models reject the old numeric thinking budget and ignore temperature; 2.x models still use them.
+function geminiGenConfig(model) {
+  if (/^gemini-[12]\./.test(model)) return { temperature: 0.6, maxOutputTokens: 800, responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 0 } };
+  const cfg = { maxOutputTokens: 2048, responseMimeType: "application/json" };
+  if (/lite/.test(model)) cfg.thinkingConfig = { thinkingLevel: "minimal" };
+  return cfg;
+}
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function buildSystem(session) {
@@ -216,15 +223,18 @@ async function geminiOnce(model, session, key) {
   if (contents.length === 0) contents.push({ role: "user", parts: [{ text: "Hi" }] }); 
   
   const url = `${GEMINI_BASE}/v1beta/models/${model}:generateContent?key=${key}`;
-  const res = await fetch(url, {
+  const generationConfig = geminiGenConfig(model);
+  const send = () => fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      system_instruction: { parts: [{ text: buildSystem(session) }] },
-      contents,
-      generationConfig: { temperature: 0.6, maxOutputTokens: 800, responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 0 } },
-    }),
+    body: JSON.stringify({ system_instruction: { parts: [{ text: buildSystem(session) }] }, contents, generationConfig }),
   });
+  let res = await send();
+  if (res.status === 400 && generationConfig.thinkingConfig) {          // model doesn't accept this thinking setting -> use its default
+    const body = await res.text();
+    if (/thinking/i.test(body)) { delete generationConfig.thinkingConfig; res = await send(); }
+    else { const err = new Error("Gemini 400: " + body.slice(0, 300)); err.status = 400; throw err; }
+  }
   if (!res.ok) { const err = new Error("Gemini " + res.status + ": " + (await res.text()).slice(0, 300)); err.status = res.status; throw err; }
   const data = await res.json();
   const txt = (data?.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
@@ -743,7 +753,7 @@ app.post("/api/push/test", auth, async (req, res) => {
 });
 
 app.get("/api/ping", (_req, res) => res.json({ ok: true }));
-app.get("/api/version", (_req, res) => res.json({ build: "2026-11-27-dsf-2", clinic: CLINIC.clinic_name, assistant: A, groqFallback: !!GROQ_KEY, aiReady: AI_READY }));
+app.get("/api/version", (_req, res) => res.json({ build: "2026-11-27-dsf-3", clinic: CLINIC.clinic_name, assistant: A, groqFallback: !!GROQ_KEY, aiReady: AI_READY }));
 app.get("/api/config", (_req, res) => res.json({ greeting: (db.settings && db.settings.greeting) || "", assistant: A, clinic: CLINIC.clinic_name, phone: CLINIC.phone_display, phoneLink: CLINIC.phone_link, whatsapp: CLINIC.whatsapp_number, privacy: CLINIC.privacy_page, booking: BOOKING_URL }));
 
 app.post(["/api/start", "/api/register"], (req, res) => {
